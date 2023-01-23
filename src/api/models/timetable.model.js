@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const id_gen = (m = Math, d = Date, h = 16, s = s => m.floor(s).toString(h)) =>
     s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h))
 
-const teacheracademicsSchema = new dynamoose.Schema({
+const timetableSchema = new dynamoose.Schema({
   _id: {
     type: String,
     maxlength: 50,
@@ -18,7 +18,7 @@ const teacheracademicsSchema = new dynamoose.Schema({
     type: String,
     required: true,
     index: {
-      name: 'academicprofileid-teacheracademics',
+      name: 'academicprofileid-timetable',
       global: true,
     },
   },
@@ -26,39 +26,36 @@ const teacheracademicsSchema = new dynamoose.Schema({
     type: String,
     required: true,
     index: {
-      name: 'schoolid-teacheracademics',
+      name: 'schoolid-timetable',
       global: true,
     },
   },
-  teacherprofileid: {
-    type: String,
-    required: true,
-    index: {
-      name: 'teacherprofileid-teacheracademics',
-      global: true,
-    },
+  validfrom: {
+    type: Date,
   },
-  subjects: {
-    type: Array,
-    schema: [{
-      type: Object,
-      schema: {
-        standard: String,
-        section: String,
-        subjectname: String,
-        subjectcode: String,
-      },
-    }],
+  validto: {
+    type: Date,
   },
-  classteacher: {
+  schedule: {
     type: Object,
     schema: {
-      isclassteacher: {
-        type: Boolean,
-        default: false,
-      },
-      standard: String,
+      class: String,
       section: String,
+      breakup: {
+        type: Object,
+        schema: {
+          day: String,
+          daybreakup: {
+            type: Object,
+            schema: {
+              from: String,
+              to: String,
+              subject: String,
+              teacher: String,
+            },
+          },
+        }
+      },
     },
   },
   addedby: {
@@ -75,9 +72,9 @@ const teacheracademicsSchema = new dynamoose.Schema({
   timestamps: true,
 });
 
-const teacheracademicsModel = dynamoose.model("Profily-Teacheracademics", teacheracademicsSchema);
+const timetableModel = dynamoose.model("Profily-Timetable", timetableSchema);
 
-teacheracademicsModel.methods.set("createTeacheracademics", async function (params) {
+timetableModel.methods.set("createTimetable", async function (params) {
   const createParams = {
     ...(params),
     _id: id_gen()
@@ -85,16 +82,16 @@ teacheracademicsModel.methods.set("createTeacheracademics", async function (para
   await dynamoose.transaction([
     this.transaction.create(createParams),
   ]);
-  const teacheracademics = this.get({_id: createParams._id});
-  return teacheracademics;
+  const school = this.get({_id: createParams._id});
+  return school;
 });
 
-teacheracademicsModel.methods.set("updateTeacheracademics", async function (key, params) {
+timetableModel.methods.set("updateTimetable", async function (key, params) {
   await dynamoose.transaction(compact([
     this.transaction.update(key, params),
   ]));
-  const teacheracademics = await this.get(key);
-  return teacheracademics;
+  const school = await this.get(key);
+  return school;
 });
 
-module.exports = teacheracademicsModel;
+module.exports = timetableModel;

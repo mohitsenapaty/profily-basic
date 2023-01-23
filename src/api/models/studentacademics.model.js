@@ -70,16 +70,16 @@ studentacademicsModel.methods.set("createStudentacademics", async function (para
   await dynamoose.transaction([
     this.transaction.create(createParams),
   ]);
-  const school = this.get({_id: createParams._id});
-  return school;
+  const studentacademics = this.get({_id: createParams._id});
+  return studentacademics;
 });
 
 studentacademicsModel.methods.set("updateStudentacademics", async function (key, params) {
   await dynamoose.transaction(compact([
     this.transaction.update(key, params),
   ]));
-  const school = await this.get(key);
-  return school;
+  const studentacademics = await this.get(key);
+  return studentacademics;
 });
 
 module.exports = studentacademicsModel;

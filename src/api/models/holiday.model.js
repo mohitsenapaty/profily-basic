@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const id_gen = (m = Math, d = Date, h = 16, s = s => m.floor(s).toString(h)) =>
     s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h))
 
-const teacherprofileSchema = new dynamoose.Schema({
+const holidaySchema = new dynamoose.Schema({
   _id: {
     type: String,
     maxlength: 50,
@@ -14,46 +14,36 @@ const teacherprofileSchema = new dynamoose.Schema({
     hashKey: true,
     default: id_gen
   },
+  academicprofileid: {
+    type: String,
+    required: true,
+    index: {
+      name: 'academicprofileid-holiday',
+      global: true,
+    },
+  },
   schoolid: {
     type: String,
     required: true,
     index: {
-      name: 'schoolid-teacherprofile',
+      name: 'schoolid-holiday',
       global: true,
     },
   },
-  userid: {
-    type: String,
-    required: true,
-    index: {
-      name: 'userid-teacherprofile',
-      global: true,
-    },
-  },
-  employmentid: {
+  holidayname: {
     type: String,
   },
-  teachername: {
+  description: {
     type: String,
   },
-  teacheremail: {
+  holidaytype: {
     type: String,
   },
-  teacherphone: {
-    type: String,
+  datestart: {
+    type: Date,
   },
-  nickname: {
-    type: String,
-  },
-  joindate: {
-    type: String,
-  },
-  reference: {
-    type: String,
-    index: {
-      name: 'reference-teacherprofile',
-      global: true,
-    },
+  dateend: {
+    type: Date,
   },
   addedby: {
     type: String,
@@ -69,9 +59,9 @@ const teacherprofileSchema = new dynamoose.Schema({
   timestamps: true,
 });
 
-const teacherprofileModel = dynamoose.model("Profily-Teacherprofile", teacherprofileSchema);
+const holidayModel = dynamoose.model("Profily-Holiday", holidaySchema);
 
-teacherprofileModel.methods.set("createTeacherprofile", async function (params) {
+holidayModel.methods.set("createHoliday", async function (params) {
   const createParams = {
     ...(params),
     _id: id_gen()
@@ -79,16 +69,16 @@ teacherprofileModel.methods.set("createTeacherprofile", async function (params) 
   await dynamoose.transaction([
     this.transaction.create(createParams),
   ]);
-  const teacherprofile = this.get({_id: createParams._id});
-  return teacherprofile;
+  const holiday = this.get({_id: createParams._id});
+  return holiday;
 });
 
-teacherprofileModel.methods.set("updateTeacherprofile", async function (key, params) {
+holidayModel.methods.set("updateHoliday", async function (key, params) {
   await dynamoose.transaction(compact([
     this.transaction.update(key, params),
   ]));
-  const teacherprofile = await this.get(key);
-  return teacherprofile;
+  const holiday = await this.get(key);
+  return holiday;
 });
 
-module.exports = teacherprofileModel;
+module.exports = holidayModel;
