@@ -1,0 +1,9 @@
+version: "1"
+services:
+  profily:
+    image: "profily-mohit"
+    ports:
+      - "1338:1338"
+    environment:
+      - DYNAMOURL=http://host.docker.internal:8000
+      - IDENTITY_URL=http://host.docker.internal:1337
